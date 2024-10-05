@@ -21,6 +21,12 @@ float* runKernelAndGetResult(
 
     float* C_ref = new float[M*N];
 
+    kernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, M, N, K, alpha, beta);
+    cudaMemcpy(C_ref, d_C, M*N*sizeof(float), cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
+    kernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, M, N, K, alpha, beta);
+    cudaDeviceSynchronize();
+
     for(int i=0;i<10;i++){
         cudaEventRecord(start);
         kernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, M, N, K, alpha, beta);
@@ -29,9 +35,6 @@ float* runKernelAndGetResult(
         float time = 0;
         cudaEventElapsedTime(&time, start, stop);
         std::cout << time << " ";
-        if(i==0){
-            cudaMemcpy(C_ref, d_C, M*N*sizeof(float), cudaMemcpyDeviceToHost);
-        }
     }
     std::cout << "\n";
     

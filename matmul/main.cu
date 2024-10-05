@@ -24,6 +24,12 @@ float* runSGEMMAndGetResult(float *A, float *B, float *C, int M, int N, int K, f
 
     float* C_ref = new float[M*N];
 
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha, d_B, N, d_A, K, &beta, d_C, N);
+    cudaMemcpy(C_ref, d_C, M*N*sizeof(float), cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
+    cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha, d_B, N, d_A, K, &beta, d_C, N);
+    cudaDeviceSynchronize();
+
     for(int i=0;i<10;i++){
         cudaEventRecord(start);
         cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha, d_B, N, d_A, K, &beta, d_C, N);
@@ -32,9 +38,6 @@ float* runSGEMMAndGetResult(float *A, float *B, float *C, int M, int N, int K, f
         float time = 0;
         cudaEventElapsedTime(&time, start, stop);
         std::cout << time << " ";
-        if(i==0){
-            cudaMemcpy(C_ref, d_C, M*N*sizeof(float), cudaMemcpyDeviceToHost);
-        }
     }
     std::cout << "\n";
     
