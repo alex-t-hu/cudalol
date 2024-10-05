@@ -11,7 +11,7 @@
         }                                                                    \
     }
 
-bool verifyMatrix(float *A1, float *A2, int M, int N);
+bool verifyMatrix(float *A1, float *A2, int M, int N, float thresh);
 
 void printMatrix(float* A, int M, int N);
 

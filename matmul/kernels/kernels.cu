@@ -27,7 +27,7 @@ float* runKernelAndGetResult(
     kernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, M, N, K, alpha, beta);
     cudaDeviceSynchronize();
 
-    for(int i=0;i<10;i++){
+    for(int i=0;i<5;i++){
         cudaEventRecord(start);
         kernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, M, N, K, alpha, beta);
         cudaEventRecord(stop);

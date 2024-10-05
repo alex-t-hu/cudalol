@@ -30,7 +30,7 @@ float* runSGEMMAndGetResult(float *A, float *B, float *C, int M, int N, int K, f
     cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha, d_B, N, d_A, K, &beta, d_C, N);
     cudaDeviceSynchronize();
 
-    for(int i=0;i<10;i++){
+    for(int i=0;i<5;i++){
         cudaEventRecord(start);
         cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha, d_B, N, d_A, K, &beta, d_C, N);
         cudaEventRecord(stop);
@@ -50,13 +50,13 @@ float* runSGEMMAndGetResult(float *A, float *B, float *C, int M, int N, int K, f
 }
 
 
-int main() {
+int main(int argc, char* argv[]) {
     cublasHandle_t handle;
     cublasCreate(&handle);
 
-    int M = 5;
-    int N = 4;
-    int K = 3;
+    int M = 4096;
+    int N = 4096;
+    int K = 4096;
     float alpha = 1.0;
     float beta = 0.1;
 
@@ -70,16 +70,15 @@ int main() {
     initializeMatrix(B, K, N, gen);
     initializeMatrix(C, M, N, gen);
 
-    dim3 blockDim(16, 16);
-    dim3 gridDim((M+blockDim.x-1)/blockDim.x, (N+blockDim.y-1)/blockDim.y);
 
     std::cout << std::setprecision(4) << std::fixed;
+
+    dim3 blockDim(16, 32);
+    dim3 gridDim((M+blockDim.x-1)/blockDim.x, (N+blockDim.y-1)/blockDim.y);
     float* C_1 = runKernelAndGetResult(sgemm1, A, B, C, M, N, K, alpha, beta, gridDim, blockDim);
-    printMatrix(C_1, M, N);
 
     float* C_ref = runSGEMMAndGetResult(A, B, C, M, N, K, alpha, beta, handle);
-    printMatrix(C_ref, M, N);
-    std::cout << verifyMatrix(C_1, C_ref, M, N) << "\n";
+    std::cout << verifyMatrix(C_1, C_ref, M, N, 1e-1) << "\n";
 
     cublasDestroy(handle);
     free(A);

@@ -2,7 +2,7 @@
 NVCC := /usr/local/cuda/bin/nvcc
 CXX := g++
 CXXFLAGS := -O3 -std=c++20
-NVCCFLAGS := -O3 -arch=sm_80
+NVCCFLAGS := -O3 -arch=sm_89
 
 # Libraries and paths
 LIBS := -lcublas -lcudart

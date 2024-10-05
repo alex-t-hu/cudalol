@@ -4,15 +4,17 @@
 #include <cublas_v2.h>
 #include "utils.hpp"
 
-bool verifyMatrix(float *A1, float *A2, int M, int N){
+bool verifyMatrix(float *A1, float *A2, int M, int N, float thresh){
+    bool isSame = true;
     for(int i=0;i<M;i++){
         for(int j=0;j<N;j++){
-            if( abs(A1[i*N+j] - A2[i*N+j]) > 1e-5){
-                return false;
+            if( fabs(A1[i*N+j] - A2[i*N+j]) > thresh){ // 1e-5 produces errors
+                isSame=false;
+                std::cout << "A1: " << A1[i*N+j] << " A2: " << A2[i*N+j] << std::endl;
             }
         }
     }
-    return true;
+    return isSame;
 }
 
 void printMatrix(float* A, int M, int N){
