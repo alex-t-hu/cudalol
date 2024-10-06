@@ -4,8 +4,8 @@
 
 __global__ void sgemm2(const float* A, const float* B, float* C, int M, int N, int K, float alpha, float beta){
     
-    int row = threadIdx.x + blockIdx.x * blockDim.x;
-    int col = threadIdx.y + blockIdx.y * blockDim.y;
+    int row = (threadIdx.x / 32) + blockIdx.x * 32;
+    int col = (threadIdx.x % 32) + blockIdx.y * 32;
     if(row<M && col<N){
         float value = 0;
         for(int i=0;i<K;i++){

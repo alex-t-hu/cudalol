@@ -4,6 +4,11 @@ CXX := g++
 CXXFLAGS := -O3 -std=c++20
 NVCCFLAGS := -O3 -arch=sm_89
 
+ifeq ($(DEBUG), 1)
+	CXXFLAGS := -g -O0 -std=c++20
+	NVCCFLAGS := -g -O0 -arch=sm_89
+endif
+
 # Libraries and paths
 LIBS := -lcublas -lcudart
 CUDA_PATH := /usr/local/cuda
@@ -19,11 +24,13 @@ CPP_SRC := $(wildcard *.cpp)
 CU_OBJ := $(CU_SRC:.cu=.o)
 CPP_OBJ := $(CPP_SRC:.cpp=.o)
 
+PTX := $(CU_SRC:.cu=.ptx)
+
 # Combine object files
 OBJ := $(CU_OBJ) $(CPP_OBJ)
 
 # Rules
-all: $(TARGET)
+all: $(TARGET) $(PTX)
 
 $(TARGET): $(OBJ)
 	$(NVCC) $(NVCCFLAGS) -o $@ $^ $(LIBS) $(LIBRARY_PATH)
@@ -36,7 +43,10 @@ $(TARGET): $(OBJ)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
 
+%.ptx: %.cu
+	$(NVCC) $(NVCCFLAGS) -ptx $< -o $@
+
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -f $(OBJ) $(TARGET) $(PTX)
 
 .PHONY: clean

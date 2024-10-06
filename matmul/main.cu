@@ -51,6 +51,7 @@ float* runSGEMMAndGetResult(float *A, float *B, float *C, int M, int N, int K, f
 
 
 int main(int argc, char* argv[]) {
+    printCUDAInfo();
     cublasHandle_t handle;
     cublasCreate(&handle);
 
@@ -73,12 +74,24 @@ int main(int argc, char* argv[]) {
 
     std::cout << std::setprecision(4) << std::fixed;
 
-    dim3 blockDim(16, 32);
-    dim3 gridDim((M+blockDim.x-1)/blockDim.x, (N+blockDim.y-1)/blockDim.y);
-    float* C_1 = runKernelAndGetResult(sgemm1, A, B, C, M, N, K, alpha, beta, gridDim, blockDim);
+    float*C_1;
+    if(argc == 1 || atoi(argv[1])==1){
+        dim3 blockDim(16, 32);
+        dim3 gridDim((M+blockDim.x-1)/blockDim.x, (N+blockDim.y-1)/blockDim.y);
+        C_1 = runKernelAndGetResult(sgemm1, A, B, C, M, N, K, alpha, beta, gridDim, blockDim);
+    }else if(atoi(argv[1])==2){
+        dim3 blockDim(32*32);
+        dim3 gridDim((M+31)/32, (N+31)/32);
+        C_1 = runKernelAndGetResult(sgemm2, A, B, C, M, N, K, alpha, beta, gridDim, blockDim);
+    }else if(atoi(argv[1])==3){
+        #define BLOCK_SIZE 16 // 16 better than 32 in this case
+        dim3 blockDim(BLOCK_SIZE ,BLOCK_SIZE);
+        dim3 gridDim((M+BLOCK_SIZE-1)/BLOCK_SIZE, (N+BLOCK_SIZE-1)/BLOCK_SIZE);
+        C_1 = runKernelAndGetResult(sgemm3<BLOCK_SIZE>, A, B, C, M, N, K, alpha, beta, gridDim, blockDim);
+    }
 
     float* C_ref = runSGEMMAndGetResult(A, B, C, M, N, K, alpha, beta, handle);
-    std::cout << verifyMatrix(C_1, C_ref, M, N, 1e-1) << "\n";
+    std::cout << verifyMatrix(C_1, C_ref, M, N, 0.01) << "\n";
 
     cublasDestroy(handle);
     free(A);

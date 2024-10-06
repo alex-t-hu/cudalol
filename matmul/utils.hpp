@@ -16,3 +16,5 @@ bool verifyMatrix(float *A1, float *A2, int M, int N, float thresh);
 void printMatrix(float* A, int M, int N);
 
 void initializeMatrix(float* A, int M, int N, std::mt19937& gen);
+
+void printCUDAInfo();
