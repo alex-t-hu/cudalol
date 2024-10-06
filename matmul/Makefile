@@ -6,7 +6,7 @@ NVCCFLAGS := -O3 -arch=sm_89
 
 ifeq ($(DEBUG), 1)
 	CXXFLAGS := -g -O0 -std=c++20
-	NVCCFLAGS := -g -O0 -arch=sm_89
+	NVCCFLAGS := -g -G -O0 -arch=sm_89 --ptxas-options=-v
 endif
 
 # Libraries and paths
